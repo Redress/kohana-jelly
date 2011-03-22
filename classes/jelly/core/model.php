@@ -551,8 +551,33 @@ abstract class Jelly_Core_Model
 							 ->values(array_values($values))
 							 ->insert();
 
-			// Gotta make sure to set this
-			$this->_changed[$this->_meta->primary_key()] = $id;
+			// Check if the model has set the primary key
+			if (($pk = $this->_meta->primary_key()) && empty($values[$pk]))
+			{
+				// Check if the query returned an insert id
+				if (empty($id))
+				{
+					try
+					{
+						// Fetch the insert ID from the default sequence field
+						$res = DB::select(DB::expr('currval(pg_get_serial_sequence(\''.$this->_meta->table().'\',\''.$pk.'\'))'))
+							->execute($this->_meta->db())
+							->current();
+
+						$values[$pk] = (int) $res['currval'];
+					}
+					catch (Exception $e)
+					{
+						// Fetching the insert ID failed
+						$values[$pk] = null;
+					}
+				}
+				else
+				{
+					// Set the primary key to the returned insert id
+					$values[$pk] = $id;
+				}
+			}
 		}
 		
 		// Re-set any saved values; they may have changed
