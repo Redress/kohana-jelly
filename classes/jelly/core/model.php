@@ -667,7 +667,7 @@ abstract class Jelly_Core_Model
 					try
 					{
 						// Fetch the insert ID from the default sequence field
-						$res = DB::select(DB::expr('currval(\''.$this->_meta->table().'_'.$pk.'_seq\')'))
+						$res = DB::select(DB::expr('currval(pg_get_serial_sequence(\''.$this->_meta->table().'\',\''.$pk.'\'))'))
 							->execute($this->_meta->db())
 							->current();
 
