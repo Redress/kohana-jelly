@@ -1,92 +1,93 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Core class that all fields must extend.
  *
- * @package  Jelly
+ * @package    Jelly
+ * @author     Jonathan Geiger
+ * @copyright  (c) 2010-2011 Jonathan Geiger
+ * @license    http://www.opensource.org/licenses/isc-license.txt
  */
-abstract class Jelly_Core_Field
-{
+abstract class Jelly_Core_Field {
+
 	/**
-	 * Constants for checking field support
+	 * Constants for checking field support.
 	 */
 	const SAVE       = 'save';
 	const HAS        = 'has';
 	const WITH       = 'with';
 	const ADD_REMOVE = 'add_remove';
 	const JOIN       = 'join';
-	
+
 	/**
-	 * @var  string  The model's name
+	 * @var  string  the model's name
 	 */
 	public $model;
 
 	/**
-	 * @var  string  The column's name in the database
+	 * @var  string  the column's name in the database
 	 */
 	public $column;
 
 	/**
-	 * @var  string  A pretty name for the field
+	 * @var  string  a pretty name for the field
 	 */
 	public $label;
 
 	/**
-	 * @var  string  The field's name in the form
+	 * @var  string  the field's name in the form
 	 */
 	public $name;
 
 	/**
-	 * @var  boolean  Whether or not the field should be unique
+	 * @var  boolean  whether or not the field should be unique
 	 */
 	public $unique = FALSE;
 
 	/**
-	* @var  boolean  A primary key field.
+	* @var  boolean  a primary key field.
 	*/
 	public $primary = FALSE;
 
 	/**
-	* @var  boolean  The column is present in the database table. Default: TRUE
+	* @var  boolean  the column is present in the database table. Default: TRUE
 	*/
 	public $in_db = TRUE;
 
 	/**
-	* @var  mixed  Default value
+	* @var  mixed  default value
 	*/
 	public $default = NULL;
 
 	/**
-	 * @var  boolean  Whether or not empty() values should be converted to NULL
+	 * @var  boolean  whether or not empty() values should be converted to NULL
 	 */
 	public $convert_empty = FALSE;
-	
+
 	/**
-	 * @var  mixed   The value to convert empty values to. This is only used if convert_empty is TRUE
+	 * @var  mixed  the value to convert empty values to. This is only used if convert_empty is TRUE
 	 */
 	public $empty_value = NULL;
-	
+
 	/**
-	 * @var  boolean  Whether or not NULL values are allowed
+	 * @var  boolean  whether or not NULL values are allowed
 	 */
 	public $allow_null = TRUE;
 
 	/**
-	* @var  array  {@link Jelly_Validator} filters for this field.
-	*              Filters are called whenever data is set on the field.
+	* @var  array  filters are called whenever data is set on the field
 	*/
 	public $filters = array();
 
 	/**
-	* @var  array  {@link Jelly_Validator} rules for this field.
+	* @var  array  rules for this field
 	*/
 	public $rules = array();
 
 	/**
-	 * Sets all options
+	 * Sets all options.
 	 *
-	 * @return  void
-	 **/
+	 * @param  array  $options
+	 */
 	public function __construct($options = array())
 	{
 		// Assume it's the column name
@@ -110,14 +111,14 @@ abstract class Jelly_Core_Field
 		}
 
 		// Default value is going to be NULL if null is true
-		// to mimic the SQL defaults
+		// to mimic the SQL defaults.
 		if ( ! array_key_exists('default', (array) $options) AND $this->allow_null)
 		{
 			$this->default = NULL;
 		}
 
 		// Default the empty value to NULL when allow_null is TRUE, but be careful not
-		// to override a programmer-configured empty_value
+		// to override a programmer-configured empty_value.
 		if ( ! empty($options['allow_null']) AND ! array_key_exists('empty_value', (array) $options))
 		{
 			$this->empty_value = NULL;
@@ -155,7 +156,7 @@ abstract class Jelly_Core_Field
 		// some callbacks for shortcut properties
 		if ($this->unique === TRUE)
 		{
-			$this->rules[] = array(array(':field', '_is_unique'), array(':validation', ':model', ':value', ':key'));
+			$this->rules[] = array(array(':field', '_is_unique'), array(':validation', ':model', ':field', ':value'));
 		}
 	}
 
@@ -201,15 +202,15 @@ abstract class Jelly_Core_Field
 	{
 		return $value;
 	}
-	
+
 	/**
 	 * Triggered whenever the model this field is attached to is deleted.
-	 * 
+	 *
 	 * This is useful for fields that need to implement some sort of
-	 * garbage collection. 
-	 * 
+	 * garbage collection.
+	 *
 	 * This method is called just before the actual record in the database
-	 * is deleted, and is not called at all if a model behavior stops 
+	 * is deleted, and is not called at all if a model behavior stops
 	 * the actual deletion of the record.
 	 *
 	 * @param   Jelly_Model  $model
@@ -220,18 +221,18 @@ abstract class Jelly_Core_Field
 	{
 		return;
 	}
-	
+
 	/**
 	 * Returns whether or not a field supports a particular feature.
-	 * 
+	 *
 	 * This is abstracted away so Jelly_Model and Jelly_Builder don't
 	 * have to litter their code with instanceof checks and so we
 	 * can change the underlying implementation at will.
-	 * 
+	 *
 	 * It is also easily overridable so custom fields can add their
 	 * own support for specific features if they want.
-	 * 
-	 * @param   string   The feature you're checking for support
+	 *
+	 * @param   string  $feature The feature you're checking for support
 	 * @return  boolean
 	 */
 	public function supports($feature)
@@ -249,39 +250,40 @@ abstract class Jelly_Core_Field
 			case Jelly_Field::JOIN:
 				return $this instanceof Jelly_Field_Supports_Join;
 		}
-		
+
 		return FALSE;
 	}
-	
+
 
 	/**
 	 * Callback for validating that a field is unique.
 	 *
-	 * @param   Validation $data
-	 * @param   string $field
+	 * @param   Validation   $data
+	 * @param   Jelly_Model  $model
+	 * @param   string       $field
+	 * @param   string       $value
 	 * @return  void
 	 */
-	public function _is_unique(Validation $data, Jelly_Model $model, $value, $key)
+	public function _is_unique(Validation $data, Jelly_Model $model, $field, $value)
 	{
 		// According to the SQL standard NULL is not checked by the unique constraint
 		// We also skip this test if the value is the same as the default value
-		if ($data[$this->name] !== NULL AND $data[$this->name] !== $this->default)
+		if ($value !== NULL AND $value !== $this->default)
 		{
-			$query = Jelly::query($model)->where($this->name, '=', $data[$this->name]);
+			// Build query
+			$query = Jelly::query($model)->where($field, '=', $value);
 
-			// Exclude unique key value from check if this is a lazy save
-			if ($key)
-			{
-				$query->where(':unique_key', '!=', $key);
-			}
+			// Limit to one
+			$query->limit(1);
 
 			if ($query->count())
 			{
-				$data->error($this->name, 'unique');
+				// Add error if duplicate found
+				$data->error($field, 'unique');
 			}
 		}
 	}
-	
+
 	/**
 	 * Potentially converts the value to NULL or default depending on
 	 * the fields configuration. An array is returned with the first
@@ -289,34 +291,34 @@ abstract class Jelly_Core_Field
 	 * as to whether the field should return the value provided or
 	 * continue processing it.
 	 *
-	 * @param   mixed  $value 
+	 * @param   mixed  $value
 	 * @return  array
 	 */
 	protected function _default($value)
 	{
 		$return = FALSE;
-		
+
 		// Convert empty values to NULL, if needed
 		if ($this->convert_empty AND empty($value))
 		{
 			$value  = $this->empty_value;
 			$return = TRUE;
 		}
-		
+
 		// Allow NULL values to pass through untouched by the field
 		if ($this->allow_null AND $value === NULL)
 		{
 			$value  = NULL;
 			$return = TRUE;
 		}
-		
+
 		return array($value, $return);
 	}
 
 	/**
-	 * Converts a bunch of types to an array of ids
+	 * Converts a bunch of types to an array of ids.
 	 *
-	 * @param   mixed  $models
+	 * @param   Jelly_Collection|mixed  $models
 	 * @return  array
 	 */
 	protected function _ids($models)
@@ -359,4 +361,5 @@ abstract class Jelly_Core_Field
 
 		return $ids;
 	}
-}
+
+} // End Jelly_Core_Field

@@ -1,4 +1,4 @@
-# Extending Fields
+## Custom fields
 
 Any custom field behavior can be added by defining your own field objects that
 extend from `Jelly_Field` or one of it's derivatives.

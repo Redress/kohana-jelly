@@ -1,8 +1,8 @@
 # Getting Started
 
-This is the documentation for Jelly, an ORM for Kohana 3.1.
+This is the documentation for Jelly, an ORM for Kohana 3.1+.
 
-[!!] __Please Note:__ this version of Jelly is a community fork, and it's goal is to ensure the compatibility with the newest Kohana version and fix bugs. It was created, because the [official module](http://github.com/jonathangeiger/kohana-jelly) was not updated recently.
+[!!] __Please Note:__ this version of Jelly is a community fork, and it's goal is to ensure the compatibility with the latest Kohana version and fix bugs. It was created, because the [official module](http://github.com/jonathangeiger/kohana-jelly) was not updated recently.
 
 First off, if you're already feeling lost feel free to ask a question in [the official forums](http://dev.kohanaframework.org/projects/jelly/boards)—we're all very nice and helpful. If you feel better looking at the source, you can always [view the API documentation](../api/Jelly) or [browse the source on Github](https://github.com/creatoro/kohana-jelly-for-Kohana-3.1).
 
@@ -25,9 +25,9 @@ If you are planning to use the included __Auth driver__ you have to set the cook
 
 The basic operations needed to work with Jelly are:
 
-1.  [Defining models](defining-models)
-2.  [Loading and listing records](loading-and-listing)
-3.  [Creating, updating and deleting records](cud)
+1.  [Defining models](getting-started/defining-models)
+2.  [Loading and listing records](getting-started/loading-and-listing)
+3.  [Creating, updating and deleting records](getting-started/cud)
 4.  [Accessing and managing relationships](relationships)
 
 ## More Advanced Use
@@ -37,4 +37,4 @@ being transparently extendable. The guides below give an overview of some more
 advanced usage.
 
 1.  [Extending the query builder](extending-builder)
-2.  [Defining custom fields](extending-field)
+2.  [Defining custom fields](field-types/custom)

@@ -1,45 +1,47 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Handles belongs to relationships.
  *
- * @package  Jelly
+ * @package    Jelly
+ * @author     Jonathan Geiger
+ * @copyright  (c) 2010-2011 Jonathan Geiger
+ * @license    http://www.opensource.org/licenses/isc-license.txt
  */
-abstract class Jelly_Core_Field_BelongsTo extends Jelly_Field implements Jelly_Field_Supports_With
-{
+abstract class Jelly_Core_Field_BelongsTo extends Jelly_Field implements Jelly_Field_Supports_With {
+
 	/**
-	 * @var  boolean  Defaults belongs_to's to in the database
+	 * @var  boolean  defaults belongs_to's to in the database
 	 */
 	public $in_db = TRUE;
-	
+
 	/**
-	 * @var  int  Default to 0 for no relationship
+	 * @var  int  default to 0 for no relationship
 	 */
 	public $default = 0;
-	
+
 	/**
-	 * @var  boolean  Null values are not allowed, 0 represents no record
+	 * @var  boolean  null values are not allowed, 0 represents no record
 	 */
 	public $allow_null = FALSE;
-	
+
 	/**
-	 * @var  boolean  Empty values are converted to the default
+	 * @var  boolean  empty values are converted to the default
 	 */
 	public $convert_empty = TRUE;
-	
+
 	/**
-	 * @var  int  Empty values are converted to 0, not NULL
+	 * @var  int  empty values are converted to 0, not NULL
 	 */
 	public $empty_value = 0;
 
 	/**
-	 * @var  string  A string pointing to the foreign model and (optionally, a
-	 *               field, column, or meta-alias).
+	 * @var  string  a string pointing to the foreign model and (optionally, a
+	 *               field, column, or meta-alias)
 	 */
 	public $foreign = '';
-	
+
 	/**
-	 * Automatically sets foreign to sensible defaults
+	 * Automatically sets foreign to sensible defaults.
 	 *
 	 * @param   string  $model
 	 * @param   string  $column
@@ -83,22 +85,22 @@ abstract class Jelly_Core_Field_BelongsTo extends Jelly_Field implements Jelly_F
 		{
 			$value = $value->id();
 		}
-		
+
 		list($value, $return) = $this->_default($value);
-		
+
 		if ( ! $return)
 		{
 			$value = ( ! $value OR is_numeric($value)) ? (int) $value : (string) $value;
 		}
-		
+
 		return $value;
 	}
 
 	/**
-	 * Returns the jelly model that this model belongs to
+	 * Returns the Jelly model that this model belongs to.
 	 *
-	 * @param   Jelly_Model  $model
-	 * @param   mixed        $value
+	 * @param   Jelly_Model    $model
+	 * @param   mixed          $value
 	 * @return  Jelly_Builder
 	 */
 	public function get($model, $value)
@@ -109,7 +111,7 @@ abstract class Jelly_Core_Field_BelongsTo extends Jelly_Field implements Jelly_F
 	}
 
 	/**
-	 * Implementation of Jelly_Field_Behavior_Joinable
+	 * Implementation of Jelly_Field_Behavior_Joinable.
 	 *
 	 * @param   Jelly_Builder  $builder
 	 * @return  void
@@ -118,4 +120,5 @@ abstract class Jelly_Core_Field_BelongsTo extends Jelly_Field implements Jelly_F
 	{
 		$builder->join(':'.$this->name, 'LEFT')->on($this->model.'.'.$this->name, '=', ':'.$this->name.'.'.$this->foreign['field']);
 	}
-}
+
+} // End Jelly_Core_Field_BelongsTo

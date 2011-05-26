@@ -1,5 +1,4 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Handles serialized data.
  *
@@ -7,10 +6,13 @@
  * actual PHP representation. When the model is saved, the value
  * is serialized back and saved as a string into the column.
  *
- * @package  Jelly
+ * @package    Jelly
+ * @author     Jonathan Geiger
+ * @copyright  (c) 2010-2011 Jonathan Geiger
+ * @license    http://www.opensource.org/licenses/isc-license.txt
  */
-abstract class Jelly_Core_Field_Serialized extends Jelly_Field
-{
+abstract class Jelly_Core_Field_Serialized extends Jelly_Field {
+
 	/**
 	 * Unserializes data as soon as it comes in.
 	 *
@@ -22,7 +24,7 @@ abstract class Jelly_Core_Field_Serialized extends Jelly_Field
 	public function set($value)
 	{
 		list($value, $return) = $this->_default($value);
-		
+
 		if ( ! $return)
 		{
 		 	if (($new_value = @unserialize($value)) !== FALSE)
@@ -30,16 +32,17 @@ abstract class Jelly_Core_Field_Serialized extends Jelly_Field
 				$value = $new_value;
 			}
 		}
-		
+
 		return $value;
 	}
 
 	/**
-	 * Saves the value as a serialized string
+	 * Saves the value as a serialized string.
 	 *
-	 * @param   Jelly  $model
-	 * @param   mixed  $value
-	 * @return  string
+	 * @param   Jelly_Model  $model
+	 * @param   mixed        $value
+	 * @param   boolean      $loaded
+	 * @return  null|string
 	 */
 	public function save($model, $value, $loaded)
 	{
@@ -47,7 +50,8 @@ abstract class Jelly_Core_Field_Serialized extends Jelly_Field
 		{
 			return NULL;
 		}
-		
+
 		return @serialize($value);
 	}
-}
+
+} // Jelly_Core_Field_Serialized
