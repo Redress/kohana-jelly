@@ -113,6 +113,29 @@ abstract class Jelly_Core
 	 */
 	public static function field($type, $options = NULL)
 	{
+		switch ($type) {
+			case 'hasone':
+				$type = 'HasOne';
+				break;
+			case 'hasmany':
+				$type = 'HasMany';
+				break;
+			case 'manytomany':
+				$type = 'ManyToMany';
+				break;
+			case 'belongsto':
+				$type = 'BelongsTo';
+				break;
+			case 'integerarray':
+				$type = 'IntegerArray';
+				break;
+			case 'uuid':
+				$type = 'UUID';
+				break;
+			default:
+				$type = ucfirst($type);
+				break;
+		}
 		$field = Jelly::$_field_prefix.$type;
 
 		return new $field($options);
@@ -189,12 +212,22 @@ abstract class Jelly_Core
 	{
 		if ($model instanceof Jelly_Model)
 		{
-			return strtolower(get_class($model));
+			$temp = strtolower(get_class($model));
 		}
 		else
 		{
-			return strtolower(Jelly::$_model_prefix.$model);
+			$temp = strtolower(Jelly::$_model_prefix.$model);
 		}
+
+		$parts = array();
+
+		foreach (explode('_', $temp) as $part) {
+			$parts[] = ucfirst($part);
+		}
+
+		$temp = implode('_', $parts);
+
+		return $temp;
 	}
 
 	/**
