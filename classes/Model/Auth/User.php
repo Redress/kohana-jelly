@@ -49,6 +49,9 @@ class Model_Auth_User extends Jelly_Model {
 				'null' => FALSE,
 				'default' => TRUE,
 			)),
+			'created' => Jelly::field('timestamp', array(
+				'default' => time(),
+			)),
 			'last_login' => Jelly::field('timestamp'),
 
             // Relationships to other models
