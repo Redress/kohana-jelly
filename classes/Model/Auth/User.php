@@ -21,8 +21,7 @@ class Model_Auth_User extends Jelly_Model {
 				'label' => 'email address',
 				'rules' => array(
 					array('not_empty'),
-					array('min_length', array(':value', 4)),
-					array('max_length', array(':value', 127)),
+					array('email'),
 				),
 				'unique' => TRUE,
 			)),
@@ -30,9 +29,6 @@ class Model_Auth_User extends Jelly_Model {
 				'label' => 'username',
 				'rules' => array(
 					array('not_empty'),
-					array('min_length', array(':value', 4)),
-					array('max_length', array(':value', 32)),
-					array('regex', array(':value', '/^[-\pL\pN_.]++$/uD')),
 				),
 				'unique' => TRUE,
 			)),
@@ -49,6 +45,13 @@ class Model_Auth_User extends Jelly_Model {
 				'convert_empty' => TRUE,
 				'empty_value' => 0,
 			)),
+			'active' => Jelly::field('boolean', array(
+				'null' => FALSE,
+				'default' => TRUE,
+			)),
+			'created' => Jelly::field('timestamp', array(
+				'default' => time(),
+			)),
 			'last_login' => Jelly::field('timestamp'),
 
             // Relationships to other models
@@ -56,6 +59,7 @@ class Model_Auth_User extends Jelly_Model {
 				'foreign' => 'user_token',
 			)),
             'roles' => Jelly::field('manytomany'),
+            'customer' => Jelly::field('hasone'),
         ));
     }
 
