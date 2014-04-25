@@ -63,6 +63,8 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 */
 	protected $_alias_cache = array();
 
+	public static $print = FALSE;
+
 	/**
 	 * Constructs a new Jelly_Builder instance.
 	 *
@@ -1101,6 +1103,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		{
 			$query->set($this->_set);
 		}
+
+		if(self::$print)
+			Notices::success($query);
 
 		return $query;
 	}
