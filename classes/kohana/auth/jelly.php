@@ -173,12 +173,16 @@ class Kohana_Auth_Jelly extends Auth {
 	 */
 	public function get_user($default = NULL)
 	{
-		$user = parent::get_user($default);
-
-		if ( ! $user)
+		$user = $this->_session->get($this->_config['session_key'], $default);
+		
+		if(!$user)
 		{
 			// check for "remembered" login
 			$user = $this->auto_login();
+		}
+		else if(!($user instanceof Model_Auth_User))
+		{
+			$user = Jelly::query('user', $user)->select();
 		}
 
 		return $user;
@@ -247,7 +251,11 @@ class Kohana_Auth_Jelly extends Auth {
 	{
 		$user->complete_login();
 
-		return parent::complete_login($user);
+		$this->_session->regenerate();
+
+		$this->_session->set($this->_config['session_key'], $user->id);
+
+		return TRUE;
 	}
 
 	/**
