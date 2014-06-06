@@ -957,6 +957,9 @@ abstract class Jelly_Core_Model
 		}
 		$changes = $this->_ids($models);
 
+		if($current == NULL)
+			$current = array();
+
 		// Are we adding or removing?
 		if ($add)
 		{

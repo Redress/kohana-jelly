@@ -1,16 +1,16 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Handles has many relationships
+ * Handles has one relationships.
  *
  * @package    Jelly
  * @author     Jonathan Geiger
  * @copyright  (c) 2010-2011 Jonathan Geiger
  * @license    http://www.opensource.org/licenses/isc-license.txt
  */
-abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Field_Supports_AddRemove, Jelly_Field_Supports_Has {
+abstract class Jelly_Core_Field_HasOne extends Jelly_Field implements Jelly_Field_Supports_With, Jelly_Field_Supports_Save {
 
 	/**
-	 * @var  boolean  false, since this field does not map directly to a column
+	 * @var  boolean  Ffalse, since this field does not map directly to a column
 	 */
 	public $in_db = FALSE;
 
@@ -22,7 +22,7 @@ abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Fie
 	/**
 	 * @var  array  default is an empty array
 	 */
-	public $default = array();
+	public $default = 0;
 
 	/**
 	 * @var  array  the default to set on foreign fields when removing the relationship
@@ -30,20 +30,20 @@ abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Fie
 	public $foreign_default = 0;
 
 	/**
+	 * @var  string  a string pointing to the foreign model and (optionally, a
+	 *               field, column, or meta-alias).
+	 */
+	public $foreign = '';
+
+	/**
 	 * @var  boolean  empty values are converted by default
 	 */
 	public $convert_empty = TRUE;
 
 	/**
-	 * @var  int  empty values are converted to array(), not NULL
+	 * @var  int  empty values are converted to 0, not NULL
 	 */
-	public $empty_value = array();
-
-	/**
-	 * @var  string  a string pointing to the foreign model and (optionally, a
-	 *               field, column, or meta-alias).
-	 */
-	public $foreign = '';
+	public $empty_value = 0;
 
 	/**
 	 * Determines the actual foreign model and field that the
@@ -61,7 +61,7 @@ abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Fie
 		// of this field, and the field defaults to this field's model's foreign key
 		if (empty($this->foreign))
 		{
-			$this->foreign = inflector::singular($this->name).'.'.$model.':foreign_key';
+			$this->foreign = Inflector::singular($this->name).'.'.$model.':foreign_key';
 		}
 		// We have a model? Default the field to this field's model's foreign key
 		elseif (FALSE === strpos($this->foreign, '.'))
@@ -74,41 +74,49 @@ abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Fie
 	}
 
 	/**
-	 * Converts a Database_Result, Jelly, array of ids, or an id to an array of ids.
+	 * Sets a relationship on the field.
 	 *
 	 * @param   mixed  $value
-	 * @return  array
+	 * @return  mixed
 	 */
 	public function set($value)
 	{
+		// Convert models to their id
+		if ($value instanceof Jelly_Model)
+		{
+			$value = $value->id();
+		}
+
 		list($value, $return) = $this->_default($value);
 
 		if ( ! $return)
 		{
-			$value = $this->_ids($value);
+			$value = is_numeric($value) ? (int) $value : (string) $value;
 		}
 
 		return $value;
 	}
 
 	/**
-	 * Returns a Jelly_Builder that can then be selected, updated, or deleted.
+	 * Returns the record that the model has.
 	 *
-	 * @param   Jelly_Model    $model
-	 * @param   mixed          $value
-	 * @return  Jelly_Builder
+	 * @param   Jelly_Model  $model
+	 * @param   mixed        $value
+	 * @return  mixed
 	 */
 	public function get($model, $value)
 	{
 		if ($model->changed($this->name))
 		{
 			return Jelly::query($this->foreign['model'])
-			            ->where($this->foreign['model'].'.'.':primary_key', 'IN', $value);
+			            ->where($this->foreign['model'].'.'.':primary_key', '=', $value)
+			            ->limit(1);
 		}
 		else
 		{
 			return Jelly::query($this->foreign['model'])
-			            ->where($this->foreign['model'].'.'.$this->foreign['field'], '=', $model->id());
+			            ->where($this->foreign['model'].'.'.$this->foreign['field'], '=', $model->id())
+			            ->limit(1);
 		}
 	}
 
@@ -132,29 +140,25 @@ abstract class Jelly_Core_Field_HasMany extends Jelly_Field implements Jelly_Fie
 		     ->update();
 
 		// Set the new relations
-		if ( ! empty($value) AND is_array($value))
+		if ( ! empty($value))
 		{
 			// Update the ones in our list
 			Jelly::query($this->foreign['model'])
-			     ->where($this->foreign['model'].'.'.':primary_key', 'IN', $value)
+			     ->where($this->foreign['model'].'.'.':primary_key', '=', $value)
 			     ->set(array($this->foreign['field'] => $model->id()))
 			     ->update();
 		}
 	}
 
 	/**
-	 * Implementation of Jelly_Field_Supports_Has.
+	 * Implementation of Jelly_Field_Supports_With.
 	 *
-	 * @param   Jelly_Model  $model
-	 * @param   mixed        $models
-	 * @return  boolean
+	 * @param   Jelly_Builder  $builder
+	 * @return  void
 	 */
-	public function has($model, $models)
+	public function with($builder)
 	{
-		return (bool) Jelly::query($this->foreign['model'])
-		                   ->where($this->foreign['model'].'.'.$this->foreign['field'], '=', $model->id())
-		                   ->where($this->foreign['model'].'.'.':primary_key', 'IN', $this->_ids($models))
-		                   ->count();
+		$builder->join(':'.$this->name, 'LEFT')->on($this->model.'.:primary_key', '=', ':'.$this->name.'.'.$this->foreign['field']);
 	}
 
-} // End Jelly_Core_Field_HasMany
+} // End Jelly_Core_Field_HasOne

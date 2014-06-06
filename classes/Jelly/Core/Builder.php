@@ -63,6 +63,8 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 */
 	protected $_alias_cache = array();
 
+	public static $print = FALSE;
+
 	/**
 	 * Constructs a new Jelly_Builder instance.
 	 *
@@ -85,6 +87,7 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		// Set the model and the initial from()
 		$this->_model = Jelly::model_name($model);
 		$this->_meta  = Jelly::meta($this->_model);
+
 		$this->_initialize();
 
 		// Default to using our key
@@ -141,6 +144,7 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 */
 	public function select_all($db = NULL)
 	{
+
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
 
@@ -286,7 +290,7 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 
 		// Find the count
 		$result = (int) $query
-		               ->select(array('COUNT("*")', 'total'))
+		               ->select(array(DB::expr('COUNT(*)'), 'total'))
 		               ->execute($db)
 		               ->get('total');
 
@@ -303,9 +307,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 * @param   string|null  $type
 	 * @return  array|int|Jelly_Collection|Jelly_Model
 	 */
-	public function execute($db = NULL, $type = NULL)
+	public function execute($db = NULL, $as_object = NULL, $object_params = NULL)
 	{
-		$type === NULL AND $type = $this->_type;
+		$type = $this->_type;
 
 		switch ($type)
 		{
@@ -327,9 +331,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 * @param  string|null  $type
 	 * @return string
 	 */
-	public function compile(Database $db, $type = NULL)
+	public function compile($db = NULL)
 	{
-		$type === NULL AND $type = $this->_type;
+		$type = $this->_type;
 
 		// Select all of the columns for the model if we haven't already
 		$this->_meta AND empty($this->_select) AND $this->select_column('*');
@@ -1099,6 +1103,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		{
 			$query->set($this->_set);
 		}
+
+		if(self::$print)
+			Notices::success($query);
 
 		return $query;
 	}

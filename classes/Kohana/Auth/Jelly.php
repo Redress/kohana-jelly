@@ -72,6 +72,12 @@ class Kohana_Auth_Jelly extends Auth {
 			$user = Jelly::factory('user')->get_user($username);
 		}
 
+		if (is_string($password))
+		{
+			// Create a hashed password
+			$password = $this->hash($password);
+		}
+
 		// If the passwords match, perform a login
 		if ($user->has('roles', Jelly::factory('role')->get_role('login')) AND $user->password === $password)
 		{
