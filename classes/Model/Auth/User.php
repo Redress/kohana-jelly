@@ -64,6 +64,7 @@ class Model_Auth_User extends Jelly_Model {
 			)),
             'roles' => Jelly::field('manytomany'),
             'customer' => Jelly::field('hasone'),
+            'user_signin' => Jelly::field('hasone'),
         ));
     }
 
