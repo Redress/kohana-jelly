@@ -21,7 +21,8 @@ class Model_Auth_User extends Jelly_Model {
 				'label' => 'email address',
 				'rules' => array(
 					array('not_empty'),
-					array('email'),
+					array('min_length', array(':value', 4)),
+					array('max_length', array(':value', 127)),
 				),
 				'unique' => TRUE,
 			)),
@@ -29,28 +30,24 @@ class Model_Auth_User extends Jelly_Model {
 				'label' => 'username',
 				'rules' => array(
 					array('not_empty'),
+					array('min_length', array(':value', 4)),
+					//array('max_length', array(':value', 32)),
+					//array('regex', array(':value', '/^[-\pL\pN_.]++$/uD')),
 				),
 				'unique' => TRUE,
 			)),
-			'password' => Jelly::field('password', array(
-				'label' => 'password',
+			'password' => Jelly::field('string', array(
+				//'label' => 'password',
 				'rules' => array(
 					array('not_empty'),
 					array('min_length', array(':value', 8)),
 				),
-				'hash_with' => array(Auth::instance(), 'hash'),
+				//'hash_with' => array(Auth::instance(), 'hash'),
 			)),
 			'logins' => Jelly::field('integer', array(
 				'default' => 0,
 				'convert_empty' => TRUE,
 				'empty_value' => 0,
-			)),
-			'active' => Jelly::field('boolean', array(
-				'null' => FALSE,
-				'default' => TRUE,
-			)),
-			'created' => Jelly::field('timestamp', array(
-				'default' => time(),
 			)),
 			'last_login' => Jelly::field('timestamp'),
 
@@ -59,7 +56,6 @@ class Model_Auth_User extends Jelly_Model {
 				'foreign' => 'user_token',
 			)),
             'roles' => Jelly::field('manytomany'),
-            'customer' => Jelly::field('hasone'),
         ));
     }
 
