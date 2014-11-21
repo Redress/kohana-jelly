@@ -160,6 +160,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		// Ready to leave the builder, we need to figure out what type to return
 		$this->_result = $this->_build(Database::SELECT);
 
+		if(self::$print)
+			echo Debug::vars($this->_result->compile($db)).PHP_EOL;
+
 		// Return an actual array
 		if ($this->_as_object === FALSE OR Jelly::meta($this->_as_object))
 		{
@@ -1103,9 +1106,6 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		{
 			$query->set($this->_set);
 		}
-
-		if(self::$print)
-			Notices::success($query);
 
 		return $query;
 	}

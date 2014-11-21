@@ -898,9 +898,17 @@ abstract class Jelly_Core_Model
 	 *
 	 * @return  mixed
 	 */
-	public function id()
+	public function id($field = NULL)
 	{
-		return $this->get($this->_meta->primary_key());
+		if($field === NULL)
+		{
+			return $this->get($this->_meta->primary_key());
+		}
+		else
+		{
+			return $this->_original[$field];
+		}
+
 	}
 
 	/**
