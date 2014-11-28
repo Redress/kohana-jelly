@@ -161,7 +161,7 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		$this->_result = $this->_build(Database::SELECT);
 
 		if(self::$print)
-			echo Debug::vars($this->_result->compile($db)).PHP_EOL;
+			echo $this->_result->compile($db).'<br>'.PHP_EOL;
 
 		// Return an actual array
 		if ($this->_as_object === FALSE OR Jelly::meta($this->_as_object))
