@@ -677,6 +677,24 @@ abstract class Jelly_Core_Model
 							->current();
 
 						$values[$pk] = (int) $res['currval'];
+
+						if(!$values[$pk])
+						{
+							try
+							{
+								// Fetch the insert ID from the value most recently obtained with nextval
+								$res = DB::select(DB::expr('lastval()'))
+									->execute($this->_meta->db())
+									->current();
+
+								$values[$pk] = (int) $res['lastval'];
+							}
+							catch (Exception $e)
+							{
+								// Fetching the insert ID failed
+								$values[$pk] = null;
+							}
+						}
 					}
 					catch (Exception $e)
 					{
