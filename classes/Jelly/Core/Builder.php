@@ -1009,19 +1009,25 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 */
 	protected function _expand_alias($model, $alias, $state)
 	{
+		$meta = Jelly::meta($model);
+
+		if($meta == NULL)
+			throw new Kohana_Exception("Unable to find model for :model ", array(
+				':model' => $model));
+
 		switch ($alias)
 		{
 			case ':primary_key':
-				$state['field'] = Jelly::meta($model)->primary_key();
+				$state['field'] = $meta->primary_key();
 				break;
 			case ':name_key':
-				$state['field'] = Jelly::meta($model)->name_key();
+				$state['field'] = $meta->name_key();
 				break;
 			case ':foreign_key':
-				$state['field'] = Jelly::meta($model)->foreign_key();
+				$state['field'] = $meta->foreign_key();
 				break;
 			case ':unique_key':
-				$state['field'] = Jelly::query(Jelly::meta($model)->model())->unique_key($state['value']);
+				$state['field'] = Jelly::query($meta->model())->unique_key($state['value']);
 				break;
 			default:
 				throw new Kohana_Exception('Unknown meta alias :alias', array(
