@@ -299,6 +299,23 @@ abstract class Jelly_Core_Meta
 		return $this->_table;
 	}
 
+	/** Gets or sets the parent table
+	 *
+	 * @param   string  $value
+	 * @return  Jelly_Meta|null
+	 */
+	public function parent($value = NULL)
+	{
+		if (func_num_args() !== 0)
+		{
+			$parent_meta = Jelly::meta($value);
+
+			return $this->set('parent', $parent_meta);
+		}
+
+		return $this->_parent;
+	}
+
 	/**
 	 * Gets or sets the builder attached to this object
 	 *
@@ -399,6 +416,23 @@ abstract class Jelly_Core_Meta
 				return $this;
 			}
 		}
+	}
+
+	/**
+	 * Returns the fields for this object and it's parents.
+	 *
+	 * @return  array
+	 */
+	public function all_fields()
+	{
+		$result = $this->_fields;
+
+		if ($this->_parent)
+		{
+			$result += $this->_parent->all_fields();
+		}
+
+		return $result;
 	}
 
 	/**

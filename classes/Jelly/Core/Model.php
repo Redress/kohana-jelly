@@ -108,6 +108,12 @@ abstract class Jelly_Core_Model
 		{
 			$name = $field->name;
 		}
+		else if ($this->_meta->parent() AND $this->_meta->parent()->field($name))
+		{
+			$parent_model = Jelly::factory($this->_meta->parent()->model())->load_values($this->_unmapped);
+
+			return $parent_model->__get($name);
+		}
 
 		if ( ! array_key_exists($name, $this->_retrieved))
 		{
@@ -649,66 +655,41 @@ abstract class Jelly_Core_Model
 		// If we have a key, we're updating
 		if ($key)
 		{
+			if ($this->_meta->parent())
+			{
+				Jelly::query($this->_meta->parent()->model())
+					->where('id', '=', $key)
+					->limit(1)
+					->select()
+					->set($this->_unmapped)
+					->save($validation);
+			}
+
 			// Do we even have to update anything in the row?
 			if ($values)
 			{
 				Jelly::query($this, $key)
-					 ->set($values)
-					 ->update();
+					->set($values)
+					->update();
 			}
 		}
 		else
 		{
-			list($id) = Jelly::query($this)
-							 ->columns(array_keys($values))
-							 ->values(array_values($values))
-							 ->insert();
-
-			// Check if the model has set the primary key
-			if (($pk = $this->_meta->primary_key()) && empty($values[$pk]))
+			if ($this->_meta->parent())
 			{
-				// Check if the query returned an insert id
-				if (empty($id))
-				{
-					try
-					{
-						// Fetch the insert ID from the default sequence field
-						$res = DB::select(DB::expr('currval(pg_get_serial_sequence(\''.$this->_meta->table().'\',\''.$pk.'\'))'))
-							->execute($this->_meta->db())
-							->current();
+				$parent = Jelly::factory($this->_meta->parent()->model())
+					->set($this->_unmapped)
+					->save($validation);
 
-						$values[$pk] = (int) $res['currval'];
-
-						if(!$values[$pk])
-						{
-							try
-							{
-								// Fetch the insert ID from the value most recently obtained with nextval
-								$res = DB::select(DB::expr('lastval()'))
-									->execute($this->_meta->db())
-									->current();
-
-								$values[$pk] = (int) $res['lastval'];
-							}
-							catch (Exception $e)
-							{
-								// Fetching the insert ID failed
-								$values[$pk] = null;
-							}
-						}
-					}
-					catch (Exception $e)
-					{
-						// Fetching the insert ID failed
-						$values[$pk] = null;
-					}
-				}
-				else
-				{
-					// Set the primary key to the returned insert id
-					$values[$pk] = $id;
-				}
+				$values['id'] = $parent->id;
 			}
+
+			list($id) = Jelly::query($this)
+				->columns(array_keys($values))
+				->values(array_values($values))
+				->insert();
+
+			$this->_changed[$this->_meta->primary_key()] = $id;
 		}
 
 		// Re-set any saved values; they may have changed

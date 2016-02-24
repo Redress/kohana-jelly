@@ -144,7 +144,6 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 	 */
 	public function select_all($db = NULL)
 	{
-
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
 
@@ -155,6 +154,10 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 
 			// Trigger before_select callback
 			$meta->events()->trigger('builder.before_select', $this);
+
+			// Join with parent table
+			if($meta->parent())
+				$this->join($meta->parent()->model())->on($meta->parent()->model().'.id', '=', $this->_model.'.id');
 		}
 
 		// Ready to leave the builder, we need to figure out what type to return
@@ -199,6 +202,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 		// Trigger callbacks
 		$meta AND $meta->events()->trigger('builder.before_insert', $this);
 
+		if(self::$print)
+			echo $this->_build(Database::INSERT)->compile($db).'<br>'.PHP_EOL;
+
 		// Ready to leave the builder
 		$result = $this->_build(Database::INSERT)->execute($db);
 
@@ -221,6 +227,9 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 
 		// Trigger callbacks
 		$meta AND $meta->events()->trigger('builder.before_update', $this);
+
+		if(self::$print)
+			echo $this->_build(Database::UPDATE)->compile($db).'<br>'.PHP_EOL;
 
 		// Ready to leave the builder
 		$result = $this->_build(Database::UPDATE)->execute($db);
@@ -489,7 +498,7 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 					{
 						$add = array();
 
-						foreach ($meta->fields() as $field)
+						foreach ($meta->all_fields() as $field)
 						{
 							if ($field->in_db)
 							{
@@ -892,10 +901,6 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 			$this->_model_cache[$original] = array($table, $alias, $model);
 			$this->_alias_cache[$alias]    = $this->_model_cache[$original];
 		}
-
-
-
-
 
 		return $this->_model_cache[$original];
 	}
