@@ -90,6 +90,10 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 
 		$this->_initialize();
 
+		// Join with parent table
+		if($this->_meta && $this->_meta->parent())
+			$this->join($this->_meta->parent()->model())->on($this->_meta->parent()->model().'.id', '=', $this->_model.'.id');
+
 		// Default to using our key
 		if ($key !== NULL)
 		{
@@ -154,10 +158,6 @@ abstract class Jelly_Core_Builder extends Database_Query_Builder_Select
 
 			// Trigger before_select callback
 			$meta->events()->trigger('builder.before_select', $this);
-
-			// Join with parent table
-			if($meta->parent())
-				$this->join($meta->parent()->model())->on($meta->parent()->model().'.id', '=', $this->_model.'.id');
 		}
 
 		// Ready to leave the builder, we need to figure out what type to return
